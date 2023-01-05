@@ -1,0 +1,14 @@
+_id: env_ca3980b0beda4809a85df223d22d3168
+type: Environment
+parentId: wrk_12f232d061fe48f3aff4dcb631cd553f
+modified: 1672914086665
+created: 1672912001565
+name: Base Environment
+data:
+  base_url: ${KONG_PROXY_URL}$
+dataPropertyOrder:
+  "&":
+    - base_url
+color: null
+isPrivate: false
+metaSortKey: 1665648128995
