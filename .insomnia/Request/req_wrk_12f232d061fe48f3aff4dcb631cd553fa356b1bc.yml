@@ -1,0 +1,21 @@
+_id: req_wrk_12f232d061fe48f3aff4dcb631cd553fa356b1bc
+type: Request
+parentId: wrk_12f232d061fe48f3aff4dcb631cd553f
+modified: 1672912007564
+created: 1672912007564
+url: "{{ base_url }}/test"
+name: Return a echo message.
+description: ""
+method: GET
+body: {}
+parameters: []
+headers: []
+authentication: {}
+metaSortKey: -1672912007564
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global

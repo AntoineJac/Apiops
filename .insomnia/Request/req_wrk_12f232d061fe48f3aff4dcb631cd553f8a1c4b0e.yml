@@ -1,0 +1,21 @@
+_id: req_wrk_12f232d061fe48f3aff4dcb631cd553f8a1c4b0e
+type: Request
+parentId: wrk_12f232d061fe48f3aff4dcb631cd553f
+modified: 1672912007565
+created: 1672912007565
+url: "{{ base_url }}/rate"
+name: Return a echo rate message.
+description: ""
+method: GET
+body: {}
+parameters: []
+headers: []
+authentication: {}
+metaSortKey: -1672912007565
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global

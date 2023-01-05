@@ -1,0 +1,36 @@
+_id: spc_4de526c46237402d89a940ae46f8f962
+type: ApiSpec
+parentId: wrk_12f232d061fe48f3aff4dcb631cd553f
+modified: 1672912056930
+created: 1672912001572
+fileName: ApiOps_Example
+contents: |
+  openapi: 3.0.0
+  info:
+   title: SampleAPI
+   version: "1.0"
+  tags:
+    - description: Sample API
+      name: Sample Echo API
+  paths:
+    /rate:
+      get:
+        responses:
+          "200":
+            description: An echo rate message.
+        summary: Return a echo rate message.
+        operationId: getRate
+        tags:
+          - Generate echo rate message
+    /test:
+      get:
+        responses:
+          "200":
+            description: An echo message.
+        summary: Return a echo message.
+        operationId: getEcho
+        tags:
+          - Generate echo message
+  servers:
+    - url: https://httpbin.org/anything
+contentType: yaml
