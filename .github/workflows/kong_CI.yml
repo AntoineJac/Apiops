@@ -1,0 +1,92 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches:
+     - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  deploy-customer-api:
+    name: Deploy Customer API to Gateway and Dev Portal
+    runs-on: macos-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v1            
+      #Installing the inso, deck and portal cli
+      - name: Install NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+      - name: Install Deck  
+        run: |
+          brew tap kong/deck
+          brew install deck
+      - name: Install inso
+        run: brew install inso
+
+      #Backup old config 
+      - name: Backup Insomnia Spec
+        run: |
+          mkdir ./spec-backup
+          deck dump --all-workspaces --kong-addr "${{ secrets.KONG_ADMIN_API_URL }}" --headers "kong-admin-token:${{ secrets.KONG_ADMIN_TOKEN }}" --tls-skip-verify
+          cp ./default.yaml ./spec-backup
+          cp ./.insomnia/ApiSpec/*.yml ./spec-backup
+          ls ./spec-backup
+
+      # API Spec linting
+      - name: Validate specification
+        run: inso lint spec ApiOps_Example
+      
+      # Generate declarative config
+      - name: Generate declarative config
+        run: |
+          inso generate config ApiOps_Example --tags ApiOps_Example --output kong-v2.yaml
+          deck convert --from kong-gateway-2.x --to kong-gateway-3.x --input-file kong-v2.yaml --output-file kong-v3.yaml
+          cat kong-v3.yaml
+      
+      # Ping the Kong instance
+      # Sync to Konnect
+      - name: Update Kong
+        run: |
+          deck ping --kong-addr "${{ secrets.KONG_ADMIN_API_URL }}" --headers "kong-admin-token:${{ secrets.KONG_ADMIN_TOKEN }}" --tls-skip-verify
+          deck sync --kong-addr "${{ secrets.KONG_ADMIN_API_URL }}" --headers "kong-admin-token:${{ secrets.KONG_ADMIN_TOKEN }}" --tls-skip-verify -s kong-v3.yaml
+
+      # Prepare test spec             
+      - name: Prepare URL 4 Test file
+        uses: cschleiden/replace-tokens@v1
+        with:
+          tokenPrefix: '${'
+          tokenSuffix: '}$'
+          files: '["./.insomnia/Environment/*.yml"]'
+        env:
+          KONG_PROXY_URL: '${{ secrets.KONG_PROXY_URL }}'
+      # Run tests on EU endpoint
+      - name: Run test suites
+        run: inso run test ApiOps_Example -e ${{ env.TARGET_ENVIRONMENT }} --verbose
+        env:
+          TARGET_ENVIRONMENT: API_Environement
+
+      - name: fallback
+        if: ${{ failure() }}
+        run: |
+          deck sync --kong-addr "${{ secrets.KONG_ADMIN_API_URL }}" --headers "kong-admin-token:${{ secrets.KONG_ADMIN_TOKEN }}" --tls-skip-verify -s ./spec-backup/default.yaml
+          echo "Deployment failed - Backup completed"
+
+      - name: success
+        if: ${{ success() }}
+        run: |
+          echo "Deployment completed successfully"
+
+
